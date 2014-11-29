@@ -80,17 +80,7 @@ CREATE TABLE AU_LayerNode(
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             this.backgroundWorker1.RunWorkerAsync();
-            //m_ataTable = new DataTable();
-
-            //m_ataTable.Columns.Add("标题", System.Type.GetType("System.String"));
-            //m_ataTable.Columns.Add("内容", System.Type.GetType("System.String"));
-
-
-  
-
-            //this.dataGridView1.DataSource = m_ataTable;
-            //this.dataGridView1.Columns[1].Visible = false;
-            //this.dataGridView1.Columns[0].Width = this.Width;
+ 
         }
         private void AddBlog(BlogGather.DelegatePara dp)
         {
@@ -139,6 +129,11 @@ CREATE TABLE AU_LayerNode(
             {
                 Directory.CreateDirectory(m_strDBFolder);
             }
+            if (File.Exists(m_strDBFolder + this.toolStripTextBox1.Text + ".db"))
+            {
+                MessageBox.Show("该博客已存在，若要重新下载请先到WebSiteDB删除!", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
             m_sqliteMng.CreateDB(m_strDBFolder + this.toolStripTextBox1.Text + ".db");
             m_sqliteMng.ExecuteSql(m_strCreatTable
                 , m_connStr1 + this.toolStripTextBox1.Text + ".db" + m_connStr2);
@@ -171,6 +166,22 @@ CREATE TABLE AU_LayerNode(
         private void Form1_Load(object sender, EventArgs e)
         {
             this.toolStripTextBox1.Text = "ice-river";
+            List<string> lstSite = new List<string>();
+            if (!Directory.Exists(m_strDBFolder))
+            {
+                Directory.CreateDirectory(m_strDBFolder);
+            }
+            DirectoryInfo dir = new DirectoryInfo(m_strDBFolder);
+            FileInfo[] dirSubs = dir.GetFiles();
+
+            // 为每个子目录添加一个子节点
+            foreach (FileInfo dirSub in dirSubs)
+            {
+
+
+                this.toolStripDropDownButton1.DropDownItems.Add(dirSub.Name.Replace(".db", ""));
+
+            }
         }
 
         private void dataGridView1_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
@@ -181,6 +192,17 @@ CREATE TABLE AU_LayerNode(
                     e.Graphics.DrawString((e.RowIndex + 1).ToString(System.Globalization.CultureInfo.CurrentUICulture), e.InheritedRowStyle.Font, b, e.RowBounds.Location.X + 10, e.RowBounds.Location.Y + 4);
                 }
             }
+        }
+
+        private void toolStripDropDownButton1_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            string strSite = e.ClickedItem.Text;
+            string strWholeDbName = m_strDBConStringPath + strSite + ".db";
+            DataSet dsTemps = m_bllAU_LayerNode.GetList(strWholeDbName, "");
+
+            this.dataGridView1.DataSource = dsTemps.Tables[0];
+            this.dataGridView1.Columns[1].Visible = false;
+            this.dataGridView1.Columns[0].Width = this.Width;
         }
 
 

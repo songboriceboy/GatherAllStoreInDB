@@ -5,6 +5,7 @@ using System.Text;
 using System.Data;
 using System.Data.SQLite;
 using System.Data.Common;
+using System.IO;
 namespace GatherAll
 {
     class Cls_SqliteMng
@@ -17,7 +18,6 @@ namespace GatherAll
         public void CreateDB(string dbName)
         {
            // string databaseFileName = System.Environment.CurrentDirectory + @"/HyData/" + dbName;
-
             SQLiteConnection.CreateFile(dbName);
         }
 
