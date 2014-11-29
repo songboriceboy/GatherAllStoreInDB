@@ -625,24 +625,16 @@ namespace DYH_DB.DAL
         public DataSet GetList(string strConString, string strWhere)
         {
             StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"select AU_LayerNodeID
-,AU_ParentLayerNodeID
-,AU_UrlAddress
-,AU_UrlTitle 博文标题
-,AU_ReserveNStr1 博文分类
-,AU_ReserveDateTime1 发表时间
+            strSql.Append(@"select 
+AU_UrlTitle 博文标题
 ,AU_UrlContent
-,AU_UrlLayer
-,AU_IsVisit
-,AU_RemoveSameOffset1
-,AU_RemoveSameOffset2
-,AU_LastUpdateDate ");
+ ");
             strSql.Append(" FROM AU_LayerNode ");
             if (strWhere.Trim() != "")
             {
                 strSql.Append(" where " + strWhere);
             }
-            strSql.Append(" order by AU_ReserveDateTime1 ");
+       
             return DbHelperSQLite.Query(strConString, strSql.ToString());
         }
 		/// <summary>
