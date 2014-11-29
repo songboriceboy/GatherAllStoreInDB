@@ -8,15 +8,18 @@ using System.Text;
 using System.Windows.Forms;
 using BlogGather;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace GatherAll
 {
     public partial class Form1 : Form
     {
-        private DataTable m_ataTable;
+        protected DYH_DB.BLL.AU_LayerNode m_bllAU_LayerNode = new DYH_DB.BLL.AU_LayerNode();
+        private string m_strDBConStringPath = @"Data Source=" + Application.StartupPath + @"\WebSiteDB\";
+
         private string m_strDBFolder = Application.StartupPath + @"\WebSiteDB\";
         private Cls_SqliteMng m_sqliteMng = new Cls_SqliteMng();
-
+        private BloomFilter m_bf = new BloomFilter(10485760);
         string m_connStr1 = @"Data Source=" + Application.StartupPath + @"\WebSiteDB\";
         string m_connStr2 = @";Initial Catalog=sqlite;Integrated Security=True;Max Pool Size=10";
         string m_strCreatTable = @"--1-2 层节点表(AU_LayerNode)
@@ -77,17 +80,17 @@ CREATE TABLE AU_LayerNode(
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             this.backgroundWorker1.RunWorkerAsync();
-            m_ataTable = new DataTable();
+            //m_ataTable = new DataTable();
 
-            m_ataTable.Columns.Add("标题", System.Type.GetType("System.String"));
-            m_ataTable.Columns.Add("内容", System.Type.GetType("System.String"));
+            //m_ataTable.Columns.Add("标题", System.Type.GetType("System.String"));
+            //m_ataTable.Columns.Add("内容", System.Type.GetType("System.String"));
 
 
   
 
-            this.dataGridView1.DataSource = m_ataTable;
-            this.dataGridView1.Columns[1].Visible = false;
-            this.dataGridView1.Columns[0].Width = this.Width;
+            //this.dataGridView1.DataSource = m_ataTable;
+            //this.dataGridView1.Columns[1].Visible = false;
+            //this.dataGridView1.Columns[0].Width = this.Width;
         }
         private void AddBlog(BlogGather.DelegatePara dp)
         {
@@ -96,13 +99,39 @@ CREATE TABLE AU_LayerNode(
                 this.Invoke(new BlogGatherCnblogs.GreetingDelegate(this.AddBlog), dp);
                 return;
             }
-            DataRow row1 = m_ataTable.NewRow();
-            row1["标题"] = dp.strTitle;
-            row1["内容"] = dp.strContent;
-            m_ataTable.Rows.Add(row1);
-            this.dataGridView1.DataSource = m_ataTable;
-            this.dataGridView1.Columns[1].Visible = false;
-            this.dataGridView1.Columns[0].Width = this.Width;
+
+            try
+            {
+                string strWholeDbName = m_strDBConStringPath + this.toolStripTextBox1.Text + ".db";
+
+
+
+                DYH_DB.Model.AU_LayerNode modelAU_LayerNode = new DYH_DB.Model.AU_LayerNode();
+                modelAU_LayerNode.AU_ParentLayerNodeID = -1;
+                modelAU_LayerNode.AU_LayerNodeID = m_bllAU_LayerNode.GetMaxId(strWholeDbName);
+                modelAU_LayerNode.AU_UrlLayer = 0;
+                modelAU_LayerNode.AU_UrlAddress = "";
+                string strTitle = Regex.Replace(dp.strTitle, @"[|/\;.':*?<>-]", "").ToString();
+                strTitle = Regex.Replace(strTitle, "[\"]", "").ToString();
+                strTitle = Regex.Replace(strTitle, @"\s", "");
+                modelAU_LayerNode.AU_UrlTitle = strTitle;
+                modelAU_LayerNode.AU_UrlContent = dp.strContent; ;
+                modelAU_LayerNode.AU_IsVisit = 0;
+                modelAU_LayerNode.AU_RemoveSameOffset1 = 0;
+                modelAU_LayerNode.AU_RemoveSameOffset2 = 0;
+                modelAU_LayerNode.AU_LastUpdateDate = System.DateTime.Now.Date;
+
+                m_bllAU_LayerNode.Add(strWholeDbName, modelAU_LayerNode);
+
+                DataSet dsTemps = m_bllAU_LayerNode.GetList(strWholeDbName, "");
+
+                this.dataGridView1.DataSource = dsTemps.Tables[0];
+                this.dataGridView1.Columns[1].Visible = false;
+                this.dataGridView1.Columns[0].Width = this.Width;
+            }
+            catch (Exception ex)
+            {
+            }
         }
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
