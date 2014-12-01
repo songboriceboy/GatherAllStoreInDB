@@ -40,25 +40,25 @@ namespace GatherAll
 
       
 
-        //执行查询返回DataSet
-        private DataSet ExecDataSet(string sqlStr)
-        {
-            //connStr = "";
-            //connStr = connStr1 + m_DBName + connStr;
-            using (SQLiteConnection conn = new SQLiteConnection(sqlStr))
-            {
-                conn.Open();
-                SQLiteCommand cmd = conn.CreateCommand();
-                cmd.CommandText = sqlStr;
-                cmd.CommandType = CommandType.Text;
+        ////执行查询返回DataSet
+        //private DataSet ExecDataSet(string sqlStr)
+        //{
+        //    //connStr = "";
+        //    //connStr = connStr1 + m_DBName + connStr;
+        //    using (SQLiteConnection conn = new SQLiteConnection(sqlStr))
+        //    {
+        //        conn.Open();
+        //        SQLiteCommand cmd = conn.CreateCommand();
+        //        cmd.CommandText = sqlStr;
+        //        cmd.CommandType = CommandType.Text;
 
-                SQLiteDataAdapter da = new SQLiteDataAdapter(cmd);
-                DataSet ds = new DataSet();
-                da.Fill(ds);
+        //        SQLiteDataAdapter da = new SQLiteDataAdapter(cmd);
+        //        DataSet ds = new DataSet();
+        //        da.Fill(ds);
 
-                return ds;
-            }
-        }
+        //        return ds;
+        //    }
+        //}
 
     }
 }
